@@ -109,6 +109,11 @@ void TutorialGame::UpdateGame(float dt) {
 
 	Debug::FlushRenderables(dt);
 	renderer->Render();
+
+	if (testStateObject)
+	{
+		testStateObject->Update(dt);
+	}
 }
 
 void TutorialGame::UpdateKeys() {
@@ -249,6 +254,8 @@ void TutorialGame::InitWorld() {
 	InitGameExamples();
 	InitDefaultFloor();
 	BridgeConstraintTest();
+	testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
+
 }
 
 void TutorialGame::BridgeConstraintTest() {
@@ -597,4 +604,24 @@ void TutorialGame::MoveSelectedObject() {
 			}
 		}
 	}
+}
+
+StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position) {
+	StateGameObject* testSphere = new StateGameObject();
+
+	SphereVolume* volume = new SphereVolume(0.25f);
+	testSphere->SetBoundingVolume((CollisionVolume*)volume);
+	testSphere->GetTransform()
+		.SetScale(Vector3(0.25, 0.25, 0.25))
+		.SetPosition(position);
+
+	testSphere->SetRenderObject(new RenderObject(&testSphere->GetTransform(), bonusMesh, nullptr, basicShader));
+	testSphere->SetPhysicsObject(new PhysicsObject(&testSphere->GetTransform(), testSphere->GetBoundingVolume()));
+
+	testSphere->GetPhysicsObject()->SetInverseMass(1.0f);
+	testSphere->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(testSphere);
+
+	return testSphere;
 }

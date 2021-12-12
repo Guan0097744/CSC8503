@@ -1,5 +1,6 @@
 #pragma once
 #include "GameTechRenderer.h"
+#include "StateGameObject.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 
 namespace NCL {
@@ -71,6 +72,10 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+			//Courseware StateMachine
+			StateGameObject* AddStateObjectToWorld(const Vector3& position);
+			StateGameObject* testStateObject = nullptr;
 
 		};
 	}

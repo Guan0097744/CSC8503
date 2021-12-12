@@ -1,14 +1,24 @@
 #pragma once
+#include <functional>
 
 namespace NCL {
 	namespace CSC8503 {
 
 		class State;
-
+		typedef std::function<bool()> StateTransitionFunction;
 		class StateTransition
 		{
 		public:
-			virtual bool CanTransition() const = 0;
+			StateTransition(State* source, State* dest, StateTransitionFunction f)
+			{
+				sourceState			= source;
+				destinationState	= dest;
+				function			= f;
+			}
+
+			bool CanTransition() const {
+				return function();
+			}
 
 			State* GetDestinationState()  const {
 				return destinationState;
@@ -19,11 +29,12 @@ namespace NCL {
 			}
 
 		protected:
-			State * sourceState;
-			State * destinationState;
+			State* sourceState;
+			State* destinationState;
+			StateTransitionFunction function;
 		};
 
-		template <class T, class U>
+		/*template <class T, class U>
 		class GenericTransition : public StateTransition
 		{
 		public:
@@ -63,7 +74,7 @@ namespace NCL {
 			GenericTransitionFunc  func;
 			T dataA;
 			U dataB;
-		};
+		};*/
 	}
 }
 

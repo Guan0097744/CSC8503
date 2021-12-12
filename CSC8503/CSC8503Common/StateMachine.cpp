@@ -36,7 +36,7 @@ void StateMachine::AddTransition(StateTransition* t) {
 void StateMachine::Update(float dt) {
 	if (activeState)
 	{
-		activeState->Update();
+		activeState->Update(dt);
 	
 		//Get the transition set starting from this state node;
 		std::pair<TransitionIterator, TransitionIterator> range = allTransitions.equal_range(activeState);
@@ -44,7 +44,7 @@ void StateMachine::Update(float dt) {
 		for (auto& i = range.first; i != range.second; ++i) {
 			if (i->second->CanTransition()) {
 				State* newState = i->second->GetDestinationState();
-				activeState = newState;
+				activeState		= newState;
 			}
 		}
 	}
