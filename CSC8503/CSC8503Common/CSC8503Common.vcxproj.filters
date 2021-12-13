@@ -25,6 +25,9 @@
     <Filter Include="Pathfinding">
       <UniqueIdentifier>{84f869c2-c73b-4eb0-ace4-ff4d685ef4ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Behaviour Tree">
+      <UniqueIdentifier>{4adc7ceb-3fc0-44f2-a1b4-191b89f51814}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameWorld.h">
@@ -105,6 +108,24 @@
     <ClInclude Include="PositionConstraint.h">
       <Filter>Physics</Filter>
     </ClInclude>
+    <ClInclude Include="StateGameObject.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourNode.h">
+      <Filter>Behaviour Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourNodeWithChildren.h">
+      <Filter>Behaviour Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourSelector.h">
+      <Filter>Behaviour Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourSequence.h">
+      <Filter>Behaviour Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourAction.h">
+      <Filter>Behaviour Tree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameWorld.cpp">
@@ -154,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="PositionConstraint.cpp">
       <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="StateGameObject.cpp">
+      <Filter>AI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

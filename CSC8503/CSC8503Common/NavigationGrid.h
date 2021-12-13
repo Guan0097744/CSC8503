@@ -4,17 +4,17 @@
 namespace NCL {
 	namespace CSC8503 {
 		struct GridNode {
-			GridNode* parent;
+			GridNode*	parent;
 
-			GridNode* connected[4];
-			int		  costs[4];
+			GridNode*	connected[4];
+			int			costs[4];
 
 			Vector3		position;
 
-			float f;
-			float g;
+			float		f;
+			float		g;
 
-			int type;
+			int			type;
 
 			GridNode() {
 				for (int i = 0; i < 4; ++i) {
@@ -41,11 +41,11 @@ namespace NCL {
 			bool		NodeInList(GridNode* n, std::vector<GridNode*>& list) const;
 			GridNode*	RemoveBestNode(std::vector<GridNode*>& list) const;
 			float		Heuristic(GridNode* hNode, GridNode* endNode) const;
-			int nodeSize;
-			int gridWidth;
-			int gridHeight;
+			int			nodeSize;
+			int			gridWidth;
+			int			gridHeight;
 
-			GridNode* allNodes;
+			GridNode*	allNodes;
 		};
 	}
 }

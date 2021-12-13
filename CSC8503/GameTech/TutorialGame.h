@@ -1,6 +1,6 @@
 #pragma once
 #include "GameTechRenderer.h"
-#include "StateGameObject.h"
+#include "../CSC8503Common/StateGameObject.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 
 namespace NCL {

@@ -1,13 +1,10 @@
 #pragma once
-#include "..\CSC8503Common\GameObject.h"
+#include "../CSC8503Common/GameObject.h"
 
-namespace NCL
-{
-	namespace CSC8503
-	{
+namespace NCL {
+	namespace CSC8503 {
 		class StateMachine;
-		class StateGameObject : public GameObject
-		{
+		class StateGameObject : public GameObject {
 		public:
 			StateGameObject();
 			~StateGameObject();

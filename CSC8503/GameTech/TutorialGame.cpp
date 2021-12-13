@@ -5,6 +5,7 @@
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
 #include "../CSC8503Common/PositionConstraint.h"
+#include "..//CSC8503Common/StateGameObject.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -284,7 +285,7 @@ void TutorialGame::BridgeConstraintTest() {
 
 /*
 
-A single function to add a large immoveable cube to the bottom of our world
+A single function to add a large immovable cube to the bottom of our world
 
 */
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
@@ -578,7 +579,7 @@ bool TutorialGame::SelectObject() {
 If an object has been clicked, it can be pushed with the right mouse button, by an amount
 determined by the scroll wheel. In the first tutorial this won't do anything, as we haven't
 added linear motion into our physics system. After the second tutorial, objects will move in a straight
-line - after the third, they'll be able to twist under torque aswell.
+line - after the third, they'll be able to twist under torque as well.
 */
 void TutorialGame::MoveSelectedObject() {
 	renderer->DrawString("Click Force:" + std::to_string(forceMagnitude), Vector2(10, 20));
@@ -607,21 +608,21 @@ void TutorialGame::MoveSelectedObject() {
 }
 
 StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position) {
-	StateGameObject* testSphere = new StateGameObject();
+	StateGameObject* apple = new StateGameObject();
 
 	SphereVolume* volume = new SphereVolume(0.25f);
-	testSphere->SetBoundingVolume((CollisionVolume*)volume);
-	testSphere->GetTransform()
+	apple->SetBoundingVolume((CollisionVolume*)volume);
+	apple->GetTransform()
 		.SetScale(Vector3(0.25, 0.25, 0.25))
 		.SetPosition(position);
 
-	testSphere->SetRenderObject(new RenderObject(&testSphere->GetTransform(), bonusMesh, nullptr, basicShader));
-	testSphere->SetPhysicsObject(new PhysicsObject(&testSphere->GetTransform(), testSphere->GetBoundingVolume()));
+	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
+	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
 
-	testSphere->GetPhysicsObject()->SetInverseMass(1.0f);
-	testSphere->GetPhysicsObject()->InitSphereInertia();
+	apple->GetPhysicsObject()->SetInverseMass(1.0f);
+	apple->GetPhysicsObject()->InitSphereInertia();
 
-	world->AddGameObject(testSphere);
+	world->AddGameObject(apple);
 
-	return testSphere;
+	return apple;
 }
