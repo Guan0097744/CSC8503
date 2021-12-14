@@ -253,7 +253,10 @@ void TutorialGame::InitWorld() {
 
 	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 	InitGameExamples();
-	InitDefaultFloor();
+	//InitDefaultFloor();
+
+	AddOBBToWorld(Vector3(0, 4, 0));	//OBB test
+
 	BridgeConstraintTest();
 	testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
 
@@ -283,10 +286,31 @@ void TutorialGame::BridgeConstraintTest() {
 	world->AddConstraint(constraint);
 }
 
+GameObject* TutorialGame::AddOBBToWorld(const Vector3& position) {
+	GameObject* floor = new GameObject();
+
+	Vector3 floorSize = Vector3(100, 2, 100);
+	OBBVolume* volume = new OBBVolume(floorSize);
+	floor->SetBoundingVolume((CollisionVolume*)volume);
+	floor->GetTransform()
+		.SetScale(floorSize * 2)
+		.SetPosition(position);
+
+	floor->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1, 0, 0), 45));
+
+	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
+	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
+
+	floor->GetPhysicsObject()->SetInverseMass(0);
+	floor->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(floor);
+
+	return floor;
+}
+
 /*
-
 A single function to add a large immovable cube to the bottom of our world
-
 */
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	GameObject* floor = new GameObject();
@@ -297,6 +321,8 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	floor->GetTransform()
 		.SetScale(floorSize * 2)
 		.SetPosition(position);
+
+	//floor->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1, 0, 0), 45));
 
 	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
 	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));

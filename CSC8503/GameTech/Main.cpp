@@ -345,7 +345,7 @@ int main() {
 		//TestPathfinding();
 		//DisplayPathfinding();
 		//TestBehaviourTree();
-		TestPushdownAutomata(w);
+		//TestPushdownAutomata(w);
 	}
 	Window::DestroyGameWindow();
 }
