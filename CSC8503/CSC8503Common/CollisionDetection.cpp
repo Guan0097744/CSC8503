@@ -504,10 +504,10 @@ bool CollisionDetection::OBBSphereIntersection(
 	if (distance < volumeB.GetRadius())
 	{
 		Vector3 collisionNormal = worldTransformA.GetOrientation() * localPoint.Normalised();
-		float penetration = (volumeB.GetRadius() - distance);
+		float penetration		= (volumeB.GetRadius() - distance);
 
-		Vector3 localA = Vector3();
-		Vector3 localB = -collisionNormal * volumeB.GetRadius();
+		Vector3 localA			= Vector3();
+		Vector3 localB			= -collisionNormal * volumeB.GetRadius();
 
 		collisionInfo.AddContactPoint(localA, localB, collisionNormal, penetration);
 

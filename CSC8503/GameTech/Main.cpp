@@ -318,6 +318,10 @@ int main() {
 	w->LockMouseToWindow(true);
 
 	TutorialGame* g = new TutorialGame();
+
+	//TestPathfinding();
+	
+
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -342,9 +346,8 @@ int main() {
 
 		//Test
 		//TestStateMachine();
-		//TestPathfinding();
-		//DisplayPathfinding();
 		//TestBehaviourTree();
+		//DisplayPathfinding();
 		//TestPushdownAutomata(w);
 	}
 	Window::DestroyGameWindow();

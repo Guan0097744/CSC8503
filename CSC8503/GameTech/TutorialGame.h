@@ -25,8 +25,14 @@ namespace NCL {
 			void InitDefaultFloor();
 			void BridgeConstraintTest();
 
+#pragma region MyInit
+
 			void InitGridMap();
-	
+			void InitSpherePlayer();
+			void InitPendulum();
+
+#pragma endregion
+
 			bool SelectObject();
 			void MoveSelectedObject();
 			void DebugObjectMovement();
@@ -48,6 +54,7 @@ namespace NCL {
 			GameWorld*			world;
 
 			NavigationGrid*		gridMap;
+			GameObject*			player;
 
 			bool				useGravity;
 			bool				inSelectionMode;

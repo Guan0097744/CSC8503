@@ -67,6 +67,9 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	delete gridMap;
+	delete player;
 }
 
 void TutorialGame::UpdateGame(float dt) {
@@ -250,22 +253,79 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
+	
+	InitGridMap();
+	InitSpherePlayer();
+	InitPendulum();
 
-	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
-	InitGameExamples();
+	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+	//InitGameExamples();
 	//InitDefaultFloor();
-
-	AddOBBToWorld(Vector3(0, 4, 0));	//OBB test
-
-	BridgeConstraintTest();
-	testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
-
+	//AddOBBToWorld(Vector3(0, 4, 0));	//OBB test
+	//BridgeConstraintTest();
+	//testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
 }
+
+#pragma region MyInit
 
 void TutorialGame::InitGridMap()
 {
-	gridMap = new NavigationGrid("TestGrid1.txt");
+	gridMap				= new NavigationGrid("TestGrid2.txt");
+	int gridSize		= gridMap->GetGridNodeSize();
+	int mapWidth		= gridMap->GetGridWidth();
+	int mapHeight		= gridMap->GetGridHeight();
+	GridNode* gridNodes = gridMap->GetNodes();
+
+	for (int h = 0; h < mapHeight; h++)
+	{
+		for (int w = 0; w < mapWidth; w++)
+		{
+			GridNode& n = gridNodes[(mapWidth * h) + w];
+			if (n.type == 'x')
+			{
+				AddCubeToWorld(n.position + Vector3(0, 10, 0), Vector3(0.5, 1, 0.5) * gridSize, 0);
+			}
+			if (n.type == '.')
+			{
+				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, 0);
+			}
+			else
+				continue;
+		}
+	}
+	
 }
+
+void TutorialGame::InitSpherePlayer()
+{
+	player = AddSphereToWorld(Vector3(0, 10, 10), 3, 10);
+}
+
+void TutorialGame::InitPendulum()
+{
+	Vector3 cubeSize = Vector3(4, 4, 4);
+	float	invCubeMass = 5;	//How heavy the middle pieces are
+	int		numLinks = 10;
+	float	maxDistance = 15;	//Constraint distance
+	float	cubeDistance = 5;	//Distance between links
+
+	Vector3		startPos = Vector3(-60, 150, 60);
+	GameObject* start = AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
+	GameObject* end = AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, 20);
+	GameObject* previous = start;
+
+	for (int i = 0; i < numLinks; ++i)
+	{
+		GameObject* block = AddCubeToWorld(startPos + Vector3((i + 1) * cubeDistance, 0, 0), cubeSize, invCubeMass);
+		PositionConstraint* constraint = new PositionConstraint(previous, block, maxDistance);
+		world->AddConstraint(constraint);
+		previous = block;
+	}
+	PositionConstraint* constraint = new PositionConstraint(previous, end, maxDistance);
+	world->AddConstraint(constraint);
+}
+
+#pragma endregion
 
 void TutorialGame::BridgeConstraintTest() {
 
@@ -277,7 +337,7 @@ void TutorialGame::BridgeConstraintTest() {
 
 	Vector3		startPos	= Vector3(-60, 150, 60);
 	GameObject* start		= AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
-	GameObject* end			= AddCubeToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), cubeSize, 0);
+	GameObject* end			= AddCubeToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), cubeSize, 20);
 	GameObject* previous	= start;
 
 	for (int i = 0; i < numLinks; ++i)
@@ -363,6 +423,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia();
+	//sphere->GetPhysicsObject()->SetFirction(1.0f);
 
 	world->AddGameObject(sphere);
 

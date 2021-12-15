@@ -36,6 +36,7 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 			char type = 0;
 			infile >> type;
 			n.type = type;
+			//std::cout << "node type is: " << n.type << std::endl;
 			n.position = Vector3((float)(x * nodeSize), 0, (float)(y * nodeSize));
 		}
 	}
@@ -62,7 +63,7 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 					if (n.connected[i]->type == '.') {
 						n.costs[i]		= 1;
 					}
-					if (n.connected[i]->type == 'x') {
+					if (n.connected[i]->type == 'x' || n.connected[i]->type == '0') {
 						n.connected[i] = nullptr; //actually a wall, disconnect!
 					}
 				}

@@ -28,7 +28,7 @@ namespace NCL {
 		struct CollisionInfo {
 			GameObject* a;
 			GameObject* b;		
-			mutable int		framesLeft;
+			mutable int framesLeft;
 
 			ContactPoint point;
 
