@@ -262,6 +262,11 @@ void TutorialGame::InitWorld() {
 
 }
 
+void TutorialGame::InitGridMap()
+{
+	gridMap = new NavigationGrid("TestGrid1.txt");
+}
+
 void TutorialGame::BridgeConstraintTest() {
 
 	Vector3 cubeSize		= Vector3(4, 4, 4);

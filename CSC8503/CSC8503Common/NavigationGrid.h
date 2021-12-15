@@ -5,10 +5,8 @@ namespace NCL {
 	namespace CSC8503 {
 		struct GridNode {
 			GridNode*	parent;
-
 			GridNode*	connected[4];
 			int			costs[4];
-
 			Vector3		position;
 
 			float		f;

@@ -2,6 +2,7 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/StateGameObject.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+#include "../CSC8503Common/NavigationGrid.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -14,19 +15,17 @@ namespace NCL {
 
 		protected:
 			void InitialiseAssets();
-
 			void InitCamera();
 			void UpdateKeys();
-
 			void InitWorld();
-
 			void InitGameExamples();
-
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
 			void InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing);
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 			void InitDefaultFloor();
 			void BridgeConstraintTest();
+
+			void InitGridMap();
 	
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -48,10 +47,12 @@ namespace NCL {
 			PhysicsSystem*		physics;
 			GameWorld*			world;
 
-			bool useGravity;
-			bool inSelectionMode;
+			NavigationGrid*		gridMap;
 
-			float		forceMagnitude;
+			bool				useGravity;
+			bool				inSelectionMode;
+
+			float				forceMagnitude;
 
 			GameObject* selectionObject = nullptr;
 
@@ -69,7 +70,7 @@ namespace NCL {
 
 			//Coursework Additional functionality	
 			GameObject* lockedObject	= nullptr;
-			Vector3 lockedOffset		= Vector3(0, 14, 20);
+			Vector3		lockedOffset	= Vector3(0, 14, 20);
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
