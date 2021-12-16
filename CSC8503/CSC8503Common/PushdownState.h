@@ -1,5 +1,6 @@
 #pragma once
 #include "State.h"
+#include <string>
 
 namespace NCL {
 	namespace CSC8503 {
@@ -17,7 +18,17 @@ namespace NCL {
 
 			virtual void OnAwake() {} //By default do nothing
 			virtual void OnSleep() {} //By default do nothing
+
+			std::string GetStateName()
+			{
+				return stateName;
+			}
+
+		protected:
+			std::string stateName;
+			bool isPaused = false;
 		};
+	
 	}
 }
 

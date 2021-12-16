@@ -4,49 +4,11 @@
 #include "../CSC8503Common/PhysicsSystem.h"
 #include "../CSC8503Common/NavigationGrid.h"
 #include "../CSC8503Common/PushdownState.h"
+#include "../CSC8503Common/PushdownMachine.h"
 
 namespace NCL {
 	namespace CSC8503 {
-
-#pragma region GameStateClass
-
-		class MenuState : public PushdownState
-		{
-			PushdownResult OnUpdate(float dt, PushdownState** newState) override
-			{
-
-			}
-		};
-
-		class Mode1State : public PushdownState
-		{
-			PushdownResult OnUpdate(float dt, PushdownState** newState) override
-			{
-
-			}
-		};
-
-		class Mode2State : public PushdownState
-		{
-			PushdownResult OnUpdate(float dt, PushdownState** newState) override
-			{
-
-			}
-		};
-
-		class PauseState : public PushdownState
-		{
-			PushdownResult OnUpdate(float dt, PushdownState** newState) override
-			{
-
-			}
-		};
-
-#pragma endregion
-
-
-
-		class TutorialGame		{
+		class TutorialGame {
 		public:
 			TutorialGame();
 			~TutorialGame();
@@ -57,7 +19,7 @@ namespace NCL {
 			void InitialiseAssets();
 			void InitCamera();
 			void UpdateKeys();
-			void InitWorld();
+			
 			void InitGameExamples();
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
 			void InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing);
@@ -67,11 +29,16 @@ namespace NCL {
 
 #pragma region MyInit
 
-			void InitGridMap();
+			void InitWorld1();
+			void InitWorld2();
+
+			void InitGridMap(string filename);
 			void InitSpherePlayer();
 			void InitPendulum();
 
 #pragma endregion
+
+			void IsPlaying(float dt);
 
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -95,9 +62,12 @@ namespace NCL {
 
 			NavigationGrid*		gridMap;
 			GameObject*			player;
+			PushdownMachine*	pdMachine;
 
 			bool				useGravity;
 			bool				inSelectionMode;
+			bool				hasInitLevel;
+			bool				isPaused;
 
 			float				forceMagnitude;
 
@@ -127,6 +97,118 @@ namespace NCL {
 			StateGameObject* testStateObject = nullptr;
 
 		};
+
+#pragma region GameStateClass
+
+		class PauseState : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+				Debug::Print("Resume ---- Press P", Vector2(35, 30));
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+				{
+					return PushdownResult::Pop;
+				}
+				return PushdownResult::NoChange;
+			}
+			void OnAwake() override
+			{
+				stateName = "PauseState";
+			}
+		};
+
+		class Mode1State : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+				Debug::Print("Pause ---- Press P", Vector2(35, 10));
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+				{
+					*newState = new PauseState();
+					return PushdownResult::Push;
+				}
+				return PushdownResult::NoChange;
+			}
+			void OnAwake() override
+			{
+				stateName = "Mode1State";
+			}
+		};
+
+		class Mode2State : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+				{
+					*newState = new PauseState();
+					return PushdownResult::Push;
+				}
+				return PushdownResult::NoChange;
+			}
+			void OnAwake() override
+			{
+				stateName = "Mode2State";
+			}
+		};
+
+		class MenuState : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+				Debug::Print("Game Mode 1 ---- Press 1", Vector2(25, 40));
+				Debug::Print("Game Mode 2 ---- Press 2", Vector2(25, 60));
+
+				if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM1) ||
+					Window::GetKeyboard()->KeyDown(KeyboardKeys::NUMPAD1))
+				{
+					*newState = new Mode1State();
+					std::cout << "Change State" << std::endl;
+					return PushdownResult::Push;
+				}
+				if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM2) ||
+					Window::GetKeyboard()->KeyDown(KeyboardKeys::NUMPAD2))
+				{
+					*newState = new Mode2State();
+					return PushdownResult::Push;
+				}
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
+				{
+					return PushdownResult::Pop;
+				}
+				return PushdownResult::NoChange;
+			}
+			void OnAwake() override
+			{
+				stateName = "MenuState";
+				//std::cout << "MenuState" << std::endl;
+			}
+		};
+
+		/*class WinState : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+
+			}
+			void OnAwake() override
+			{
+				stateName = "WinState";
+			}
+		};
+
+		class LoseState : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+
+			}
+			void OnAwake() override
+			{
+				stateName = "LoseState";
+			}
+		};*/
+#pragma endregion
 	}
 }
 

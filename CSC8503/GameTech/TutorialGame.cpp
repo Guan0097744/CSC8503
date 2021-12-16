@@ -14,10 +14,12 @@ TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
+	pdMachine	= new PushdownMachine(new MenuState());
 
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
 	inSelectionMode = false;
+	hasInitLevel	= false;
 
 	Debug::SetRenderer(renderer);
 
@@ -50,7 +52,7 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	InitCamera();
-	InitWorld();
+	//InitWorld();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -70,15 +72,61 @@ TutorialGame::~TutorialGame()	{
 
 	delete gridMap;
 	delete player;
+	delete pdMachine;
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
+	
+	UpdateKeys();
+	world->UpdateWorld(dt);
+	renderer->Update(dt);
+	Debug::FlushRenderables(dt);
+	renderer->Render();
+
+	if (!pdMachine->Update(dt))
+	{
+		return;
 	}
 
-	UpdateKeys();
+	//IsPlaying(dt);
 
+	if (pdMachine->GetActiveState()->GetStateName() == "Mode1State")
+	{
+		if (hasInitLevel == false)
+		{
+			hasInitLevel = true;
+			InitWorld1();
+		}
+
+		if (!inSelectionMode) {
+			world->GetMainCamera()->UpdateCamera(dt);
+		}
+
+		IsPlaying(dt);
+	}
+	if (pdMachine->GetActiveState()->GetStateName() == "Mode2State")
+	{
+		if (hasInitLevel == false)
+		{
+			hasInitLevel = true;
+			InitWorld2();
+		}
+
+		if (!inSelectionMode) {
+			world->GetMainCamera()->UpdateCamera(dt);
+		}
+
+		IsPlaying(dt);
+	}
+	if (pdMachine->GetActiveState()->GetStateName() == "PauseState")
+	{
+
+	}
+
+}
+
+void TutorialGame::IsPlaying(float dt)
+{
 	if (useGravity) {
 		Debug::Print("(G)ravity on", Vector2(5, 95));
 	}
@@ -94,7 +142,7 @@ void TutorialGame::UpdateGame(float dt) {
 		Vector3 objPos = lockedObject->GetTransform().GetPosition();
 		Vector3 camPos = objPos + lockedOffset;
 
-		Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0,1,0));
+		Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0, 1, 0));
 
 		Matrix4 modelMat = temp.Inverse();
 
@@ -108,11 +156,11 @@ void TutorialGame::UpdateGame(float dt) {
 		//Debug::DrawAxisLines(lockedObject->GetTransform().GetMatrix(), 2.0f);
 	}
 
-	world->UpdateWorld(dt);
+	/*world->UpdateWorld(dt);
 	renderer->Update(dt);
 
 	Debug::FlushRenderables(dt);
-	renderer->Render();
+	renderer->Render();*/
 
 	if (testStateObject)
 	{
@@ -122,7 +170,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
-		InitWorld(); //We can reset the simulation at any time with F1
+		InitWorld1(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
 		lockedObject	= nullptr;
 	}
@@ -250,11 +298,11 @@ void TutorialGame::InitCamera() {
 	lockedObject = nullptr;
 }
 
-void TutorialGame::InitWorld() {
+void TutorialGame::InitWorld1() {
 	world->ClearAndErase();
 	physics->Clear();
 	
-	InitGridMap();
+	InitGridMap("Mode 1.txt");
 	InitSpherePlayer();
 	InitPendulum();
 
@@ -266,11 +314,19 @@ void TutorialGame::InitWorld() {
 	//testStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
 }
 
+void TutorialGame::InitWorld2() {
+	world->ClearAndErase();
+	physics->Clear();
+
+	InitGridMap("Mode 2.txt");
+	InitSpherePlayer();
+}
+
 #pragma region MyInit
 
-void TutorialGame::InitGridMap()
+void TutorialGame::InitGridMap(string filename)
 {
-	gridMap				= new NavigationGrid("TestGrid2.txt");
+	gridMap				= new NavigationGrid(filename);
 	int gridSize		= gridMap->GetGridNodeSize();
 	int mapWidth		= gridMap->GetGridWidth();
 	int mapHeight		= gridMap->GetGridHeight();
@@ -293,7 +349,6 @@ void TutorialGame::InitGridMap()
 				continue;
 		}
 	}
-	
 }
 
 void TutorialGame::InitSpherePlayer()
@@ -327,6 +382,29 @@ void TutorialGame::InitPendulum()
 
 #pragma endregion
 
+GameObject* TutorialGame::AddOBBToWorld(const Vector3& position) {
+	GameObject* floor = new GameObject();
+
+	Vector3 floorSize = Vector3(100, 2, 100);
+	OBBVolume* volume = new OBBVolume(floorSize);
+	floor->SetBoundingVolume((CollisionVolume*)volume);
+	floor->GetTransform()
+		.SetScale(floorSize * 2)
+		.SetPosition(position);
+
+	floor->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1, 0, 0), 45));
+
+	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
+	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
+
+	floor->GetPhysicsObject()->SetInverseMass(0);
+	floor->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(floor);
+
+	return floor;
+}
+
 void TutorialGame::BridgeConstraintTest() {
 
 	Vector3 cubeSize		= Vector3(4, 4, 4);
@@ -349,29 +427,6 @@ void TutorialGame::BridgeConstraintTest() {
 	}
 	PositionConstraint* constraint = new PositionConstraint(previous, end, maxDistance);
 	world->AddConstraint(constraint);
-}
-
-GameObject* TutorialGame::AddOBBToWorld(const Vector3& position) {
-	GameObject* floor = new GameObject();
-
-	Vector3 floorSize = Vector3(100, 2, 100);
-	OBBVolume* volume = new OBBVolume(floorSize);
-	floor->SetBoundingVolume((CollisionVolume*)volume);
-	floor->GetTransform()
-		.SetScale(floorSize * 2)
-		.SetPosition(position);
-
-	floor->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1, 0, 0), 45));
-
-	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
-	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
-
-	floor->GetPhysicsObject()->SetInverseMass(0);
-	floor->GetPhysicsObject()->InitCubeInertia();
-
-	world->AddGameObject(floor);
-
-	return floor;
 }
 
 /*
