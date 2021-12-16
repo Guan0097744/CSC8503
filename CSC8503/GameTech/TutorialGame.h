@@ -3,9 +3,49 @@
 #include "../CSC8503Common/StateGameObject.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 #include "../CSC8503Common/NavigationGrid.h"
+#include "../CSC8503Common/PushdownState.h"
 
 namespace NCL {
 	namespace CSC8503 {
+
+#pragma region GameStateClass
+
+		class MenuState : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+
+			}
+		};
+
+		class Mode1State : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+
+			}
+		};
+
+		class Mode2State : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+
+			}
+		};
+
+		class PauseState : public PushdownState
+		{
+			PushdownResult OnUpdate(float dt, PushdownState** newState) override
+			{
+
+			}
+		};
+
+#pragma endregion
+
+
+
 		class TutorialGame		{
 		public:
 			TutorialGame();
