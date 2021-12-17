@@ -15,6 +15,8 @@ namespace NCL {
 
 			virtual void UpdateGame(float dt);
 
+			bool isQuit = false;
+
 		protected:
 			void InitialiseAssets();
 			void InitCamera();
@@ -29,6 +31,7 @@ namespace NCL {
 
 #pragma region MyInit
 
+			void InitMenu();
 			void InitWorld1();
 			void InitWorld2();
 
@@ -45,10 +48,13 @@ namespace NCL {
 			void DebugObjectMovement();
 			void LockedObjectMovement();
 
-			GameObject* AddOBBToWorld(const Vector3& position);
 			GameObject* AddFloorToWorld(const Vector3& position);
+			GameObject* AddOBBToWorld(const Vector3& position);
+			GameObject* AddOBBToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
+			GameObject* AddSphereToWorld(const Vector3& position, float radius, string objectName, string tag, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f);
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 
@@ -105,8 +111,14 @@ namespace NCL {
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
 				Debug::Print("Resume ---- Press P", Vector2(35, 30));
+				Debug::Print("Menu   ---- Press ESC", Vector2(35, 40));
 				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
 				{
+					return PushdownResult::Pop;
+				}
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
+				{
+					popTimes = 2;
 					return PushdownResult::Pop;
 				}
 				return PushdownResult::NoChange;
@@ -157,7 +169,8 @@ namespace NCL {
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
 				Debug::Print("Game Mode 1 ---- Press 1", Vector2(25, 40));
-				Debug::Print("Game Mode 2 ---- Press 2", Vector2(25, 60));
+				Debug::Print("Game Mode 2 ---- Press 2", Vector2(25, 50));
+				Debug::Print("       Quit ---- Press ESC", Vector2(25, 60));
 
 				if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM1) ||
 					Window::GetKeyboard()->KeyDown(KeyboardKeys::NUMPAD1))
@@ -185,7 +198,7 @@ namespace NCL {
 			}
 		};
 
-		/*class WinState : public PushdownState
+		class WinState : public PushdownState
 		{
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
@@ -201,13 +214,21 @@ namespace NCL {
 		{
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
-
+				Debug::Print("You Lose!", Vector2(40, 40));
+				Debug::Print("Restart ---- Press R", Vector2(35, 50));
+				Debug::Print("Menu	  ---- Press ES", Vector2(35, 50));
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+				{
+					popTimes = 2;
+					return PushdownResult::Pop;
+				}
+				return PushdownResult::NoChange;
 			}
 			void OnAwake() override
 			{
 				stateName = "LoseState";
 			}
-		};*/
+		};
 #pragma endregion
 	}
 }

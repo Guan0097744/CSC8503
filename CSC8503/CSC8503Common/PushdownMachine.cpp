@@ -12,17 +12,21 @@ bool PushdownMachine::Update(float dt)
 		{
 			case PushdownState::Pop: 
 			{
-				//activeState->OnSleep();
-				delete activeState;
-				stateStack.pop();
-				if (stateStack.empty()) 
+				int t = activeState->GetPopTimes();
+				for (int i = 0; i < t; i++)
 				{
-					return false;
-				}
-				else 
-				{
-					activeState = stateStack.top();
-					activeState->OnAwake();
+					//activeState->OnSleep();
+					delete activeState;
+					stateStack.pop();
+					if (stateStack.empty())
+					{
+						return false;
+					}
+					else
+					{
+						activeState = stateStack.top();
+						activeState->OnAwake();
+					}
 				}
 			}break;
 			case PushdownState::Push: 

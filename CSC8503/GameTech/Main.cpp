@@ -234,7 +234,7 @@ int main() {
 	//TestPathfinding();
 
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
-	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
+	while (w->UpdateWindow() && !g->isQuit/*&& !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)*/) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
 		if (dt > 0.1f) {
 			std::cout << "Skipping large time delta" << std::endl;

@@ -24,9 +24,20 @@ namespace NCL {
 				return stateName;
 			}
 
+			void SetPopTimes(int pt)
+			{
+				popTimes = pt;
+			}
+
+			int GetPopTimes() const
+			{
+				return popTimes;
+			}
+
 		protected:
 			std::string stateName;
 			bool isPaused = false;
+			int popTimes = 1;
 		};
 	
 	}

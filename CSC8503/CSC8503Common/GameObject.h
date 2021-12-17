@@ -73,6 +73,16 @@ namespace NCL {
 				return worldID;
 			}
 
+			void SetTag(string objectTag)
+			{
+				tag = objectTag;
+			}
+
+			string GetTag() const
+			{
+				return tag;
+			}
+
 		protected:
 			Transform			transform;
 
@@ -83,6 +93,7 @@ namespace NCL {
 			bool	isActive;
 			int		worldID;
 			string	name;
+			string	tag;
 
 			Vector3 broadphaseAABB;
 		};
