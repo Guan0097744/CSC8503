@@ -5,6 +5,7 @@ using namespace NCL::CSC8503;
 
 GameObject::GameObject(string objectName)	{
 	name			= objectName;
+	tag				= "Default";
 	worldID			= -1;
 	isActive		= true;
 	boundingVolume	= nullptr;

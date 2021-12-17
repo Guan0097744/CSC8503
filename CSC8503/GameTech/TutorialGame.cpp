@@ -87,7 +87,6 @@ void TutorialGame::UpdateGame(float dt) {
 		isQuit = true;
 		return;
 	}
-
 	if (pdMachine->GetActiveState()->GetStateName() == "MenuState")
 	{
 		InitMenu();
@@ -171,11 +170,11 @@ void TutorialGame::IsPlaying(float dt)
 }
 
 void TutorialGame::UpdateKeys() {
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
-		InitWorld1(); //We can reset the simulation at any time with F1
-		selectionObject = nullptr;
-		lockedObject	= nullptr;
-	}
+	//if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
+	//	InitWorld1(); //We can reset the simulation at any time with F1
+	//	selectionObject = nullptr;
+	//	lockedObject	= nullptr;
+	//}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
@@ -356,11 +355,11 @@ void TutorialGame::InitGridMap(string filename)
 			GridNode& n = gridNodes[(mapWidth * h) + w];
 			if (n.type == 'x')
 			{
-				AddCubeToWorld(n.position + Vector3(0, 10, 0), Vector3(0.5, 1, 0.5) * gridSize, 0);
+				AddCubeToWorld(n.position + Vector3(0, 10, 0), Vector3(0.5, 1, 0.5) * gridSize, "Wall", "Default", 0);
 			}
 			if (n.type == '.')
 			{
-				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, 0);
+				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Floor", "Default", 0);
 			}
 			else
 				continue;
@@ -376,16 +375,16 @@ void TutorialGame::InitSpherePlayer()
 
 void TutorialGame::InitPendulum()
 {
-	Vector3 cubeSize = Vector3(4, 4, 4);
-	float	invCubeMass = 5;	//How heavy the middle pieces are
-	int		numLinks = 10;
-	float	maxDistance = 15;	//Constraint distance
-	float	cubeDistance = 5;	//Distance between links
+	Vector3 cubeSize		= Vector3(4, 4, 4);
+	float	invCubeMass		= 20;	//How heavy the middle pieces are
+	int		numLinks		= 10;
+	float	maxDistance		= 15;	//Constraint distance
+	float	cubeDistance	= 10;	//Distance between links
 
-	Vector3		startPos = Vector3(-60, 150, 60);
-	GameObject* start = AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
-	GameObject* end = AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, 20);
-	GameObject* previous = start;
+	Vector3		startPos	= Vector3(-60, 150, 60);
+	GameObject* start		= AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
+	GameObject* end			= AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, "Ball", "Obstacle", 20);
+	GameObject* previous	= start;
 
 	for (int i = 0; i < numLinks; ++i)
 	{
@@ -399,30 +398,6 @@ void TutorialGame::InitPendulum()
 }
 
 #pragma endregion
-
-GameObject* TutorialGame::AddOBBToWorld(const Vector3& position) {
-	GameObject* floor = new GameObject();
-	floor->SetTag("Default");
-
-	Vector3 floorSize = Vector3(100, 2, 100);
-	OBBVolume* volume = new OBBVolume(floorSize);
-	floor->SetBoundingVolume((CollisionVolume*)volume);
-	floor->GetTransform()
-		.SetScale(floorSize * 2)
-		.SetPosition(position);
-
-	floor->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1, 0, 0), 45));
-
-	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
-	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
-
-	floor->GetPhysicsObject()->SetInverseMass(0);
-	floor->GetPhysicsObject()->InitCubeInertia();
-
-	world->AddGameObject(floor);
-
-	return floor;
-}
 
 void TutorialGame::BridgeConstraintTest() {
 
@@ -472,6 +447,53 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	world->AddGameObject(floor);
 
 	return floor;
+}
+
+GameObject* TutorialGame::AddOBBToWorld(const Vector3& position) {
+	GameObject* floor = new GameObject();
+	floor->SetTag("Default");
+
+	Vector3 floorSize = Vector3(100, 2, 100);
+	OBBVolume* volume = new OBBVolume(floorSize);
+	floor->SetBoundingVolume((CollisionVolume*)volume);
+	floor->GetTransform()
+		.SetScale(floorSize * 2)
+		.SetPosition(position);
+
+	floor->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1, 0, 0), 45));
+
+	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
+	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
+
+	floor->GetPhysicsObject()->SetInverseMass(0);
+	floor->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(floor);
+
+	return floor;
+}
+GameObject* TutorialGame::AddOBBToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass)
+{
+	GameObject* cube = new GameObject(objectName);
+	cube->SetTag(tag);
+
+	OBBVolume* volume = new OBBVolume(dimensions);
+
+	cube->SetBoundingVolume((CollisionVolume*)volume);
+
+	cube->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
+
+	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	cube->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(cube);
+
+	return cube;
 }
 
 /*
@@ -753,7 +775,10 @@ bool TutorialGame::SelectObject() {
 			RayCollision closestCollision;
 			if (world->Raycast(ray, closestCollision, true)) {
 				selectionObject = (GameObject*)closestCollision.node;
-				selectionObject->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
+				if (selectionObject->GetTag() != "Default")
+				{
+					selectionObject->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
+				}
 				return true;
 			}
 			else {
@@ -769,12 +794,12 @@ bool TutorialGame::SelectObject() {
 		renderer->DrawString("Press L to unlock object!", Vector2(5, 80));
 	}
 
-	else if(selectionObject){
+	else if(selectionObject && selectionObject->GetTag() != "Default"){
 		renderer->DrawString("Press L to lock selected object object!", Vector2(5, 80));
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(NCL::KeyboardKeys::L)) {
-		if (selectionObject) {
+		if (selectionObject && selectionObject->GetTag() != "Default") {
 			if (lockedObject == selectionObject) {
 				lockedObject = nullptr;
 			}
@@ -796,7 +821,7 @@ line - after the third, they'll be able to twist under torque as well.
 */
 void TutorialGame::MoveSelectedObject() {
 	renderer->DrawString("Click Force:" + std::to_string(forceMagnitude), Vector2(10, 20));
-	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
+	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 50.0f;
 
 	if (!selectionObject)
 		return;

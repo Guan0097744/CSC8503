@@ -134,7 +134,8 @@ namespace NCL {
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
 				Debug::Print("Pause ---- Press P", Vector2(35, 10));
-				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P) ||
+					Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
 				{
 					*newState = new PauseState();
 					return PushdownResult::Push;
@@ -151,7 +152,9 @@ namespace NCL {
 		{
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
-				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+				Debug::Print("Pause ---- Press P", Vector2(35, 10));
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P) ||
+					Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
 				{
 					*newState = new PauseState();
 					return PushdownResult::Push;
@@ -215,9 +218,9 @@ namespace NCL {
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
 				Debug::Print("You Lose!", Vector2(40, 40));
-				Debug::Print("Restart ---- Press R", Vector2(35, 50));
-				Debug::Print("Menu	  ---- Press ES", Vector2(35, 50));
-				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+				//Debug::Print("Restart ---- Press R", Vector2(35, 50));
+				Debug::Print("Menu ---- Press ESC", Vector2(35, 50));
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
 				{
 					popTimes = 2;
 					return PushdownResult::Pop;

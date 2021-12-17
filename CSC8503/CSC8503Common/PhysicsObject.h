@@ -89,7 +89,6 @@ namespace NCL {
 			//linear stuff
 			Vector3 linearVelocity;
 			Vector3 force;
-			
 
 			//angular stuff
 			Vector3 angularVelocity;
