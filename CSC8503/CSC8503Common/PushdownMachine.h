@@ -21,6 +21,11 @@ namespace NCL {
 				return activeState;
 			}
 
+			void SetActiveState(PushdownState* state)
+			{
+				activeState = state;
+			}
+
 		protected:
 			PushdownState* activeState;
 			PushdownState* initialState;

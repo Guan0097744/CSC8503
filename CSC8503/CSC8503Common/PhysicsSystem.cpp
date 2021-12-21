@@ -24,7 +24,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	useBroadPhase	= false;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
-	SetGravity(Vector3(0.0f, -9.8f * 5, 0.0f));
+	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
 }
 
 PhysicsSystem::~PhysicsSystem()	{
@@ -154,6 +154,7 @@ rocket launcher, gaining a point when the player hits the gold coin, and so on).
 */
 void PhysicsSystem::UpdateCollisionList() {
 	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); ) {
+
 		if ((*i).framesLeft == numCollisionFrames) {
 			i->a->OnCollisionBegin(i->b);
 			i->b->OnCollisionBegin(i->a);
@@ -205,10 +206,18 @@ void PhysicsSystem::BasicCollisionDetection() {
 			CollisionDetection::CollisionInfo info;
 			if (CollisionDetection::ObjectIntersection(*i, *j, info))
 			{
-				//std::cout << "Collision between " << (*i)->GetName() << " and " << (*j)->GetName() << std::endl;
-				ImpulseResolveCollision(*info.a, *info.b, info.point);
+				if ((*i)->GetPhysicsObject()->GetTrigger() || (*j)->GetPhysicsObject()->GetTrigger())
+				{
+					continue;
+				}
+				else
+				{
+					//std::cout << "Collision between " << (*i)->GetName() << " and " << (*j)->GetName() << std::endl;
+					ImpulseResolveCollision(*info.a, *info.b, info.point);
+				}
 				info.framesLeft = numCollisionFrames;
 				allCollisions.insert(info);
+				
 			}
 		}
 	}

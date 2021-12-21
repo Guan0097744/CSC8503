@@ -41,7 +41,8 @@ namespace NCL {
 
 #pragma endregion
 
-			void IsPlaying(float dt);
+			void Mode1Playing(float dt);
+			void Mode2Playing(float dt);
 
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -50,17 +51,19 @@ namespace NCL {
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddOBBToWorld(const Vector3& position);
-			GameObject* AddOBBToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f);
+			GameObject* AddOBBToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f, Vector4 color = Vector4(1, 1, 1, 1));
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
-			GameObject* AddSphereToWorld(const Vector3& position, float radius, string objectName, string tag, float inverseMass = 10.0f);
+			GameObject* AddSphereToWorld(const Vector3& position, float radius, string objectName, string tag, float inverseMass = 10.0f, Vector4 color = Vector4(1, 1, 1, 1));
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f, Vector4 color = Vector4(1, 1, 1, 1));
 			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
 
 			GameObject* AddPlayerToWorld(const Vector3& position);
 			GameObject* AddEnemyToWorld(const Vector3& position);
 			GameObject* AddBonusToWorld(const Vector3& position);
+			GameObject* AddBonusToWorld(const Vector3& position, float radius, string objectName, string tag, float inverseMass = 0.0f, Vector4 color = Vector4(1, 1, 0, 1));
+
 
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
@@ -94,9 +97,7 @@ namespace NCL {
 			//Coursework Additional functionality	
 			GameObject* lockedObject	= nullptr;
 			Vector3		lockedOffset	= Vector3(0, 14, 20);
-			void LockCameraToObject(GameObject* o) {
-				lockedObject = o;
-			}
+			void LockCameraToObject(GameObject* obj, Vector3 lockedOffset, GameWorld* world);
 
 			//Courseware StateMachine
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
@@ -217,12 +218,12 @@ namespace NCL {
 		{
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
-				Debug::Print("You Lose!", Vector2(40, 40));
+				Debug::Print("You Lose!", Vector2(45, 40));
 				//Debug::Print("Restart ---- Press R", Vector2(35, 50));
 				Debug::Print("Menu ---- Press ESC", Vector2(35, 50));
 				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
 				{
-					popTimes = 2;
+					//popTimes = 2;
 					return PushdownResult::Pop;
 				}
 				return PushdownResult::NoChange;

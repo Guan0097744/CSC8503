@@ -78,6 +78,16 @@ namespace NCL {
 				friction = f;
 			}
 
+			bool GetTrigger()
+			{
+				return isTrigger;
+			}
+
+			void SetTrigger(bool state)
+			{
+				isTrigger = state;
+			}
+
 		protected:
 			const CollisionVolume* volume;
 			Transform*		transform;
@@ -85,6 +95,7 @@ namespace NCL {
 			float inverseMass;
 			float elasticity;
 			float friction;
+			bool  isTrigger;
 
 			//linear stuff
 			Vector3 linearVelocity;
