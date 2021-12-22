@@ -143,13 +143,19 @@ void TutorialGame::Mode1Playing(float dt)
 
 	if (lockedObject != nullptr) {
 		LockCameraToObject(lockedObject, Vector3(0, 50, 10), world);
-		//Debug::DrawAxisLines(lockedObject->GetTransform().GetMatrix(), 2.0f);
+		Debug::DrawAxisLines(lockedObject->GetTransform().GetMatrix(), 2.0f);
 	}
 
 	/*world->UpdateWorld(dt);
 	renderer->Update(dt);
 	Debug::FlushRenderables(dt);
 	renderer->Render();*/
+
+	for (auto i : world->GetAllObjs())
+	{
+		if(i->GetTag() == "Prop")
+			Debug::DrawAxisLines(i->GetTransform().GetMatrix(), 2.0f);
+	}
 
 	for (auto i : obsStateObjects)
 	{
@@ -340,6 +346,7 @@ void TutorialGame::InitMenu()
 	world->ClearAndErase();
 	physics->Clear();
 	physics->UseGravity(useGravity);
+	obsStateObjects.clear();
 
 	InitCamera();
 }
@@ -348,7 +355,7 @@ void TutorialGame::InitWorld1() {
 	
 	InitGridMap("Mode 1.txt");
 	InitSpherePlayer();
-	InitPendulum();
+	//InitPendulum();
 }
 
 void TutorialGame::InitWorld2() {
@@ -395,19 +402,30 @@ void TutorialGame::InitGridMap(string filename)
 			}
 			if (n.type == 'p')
 			{
-				AddCubeToWorld(n.position + Vector3(0, 6, 0), Vector3(0.5, 0.5, 0.5) * gridSize, "Prop", "Prop", 0, Vector4(0, 0.5, 0, 1));
+				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Floor", "Default", 0);
+				AddCubeToWorld(n.position + Vector3(0, 6, 0), Vector3(0.5, 0.5, 0.5) * gridSize, "Prop", "Prop", 0.5, Vector4(0, 0.5, 0, 1));
 			}
 			if (n.type == '/')
 			{
-				AddOBBToWorld(n.position + Vector3(0, 3, 0), Vector3(0.5, 0.1, 0.5) * gridSize, Quaternion::AxisAngleToQuaterion(Vector3(0, 0, 1), 30), "Prop", "Prop", 0, Vector4(1, 0, 0, 1));
+				AddOBBToWorld(n.position + Vector3(0, 3, 0), Vector3(0.5, 0.1, 0.5) * gridSize, Quaternion::AxisAngleToQuaterion(Vector3(0, 0, 1), 30), "Slope", "Default", 0, Vector4(1, 0, 0, 1));
 			}
 			if (n.type == '\\')
 			{
-				AddOBBToWorld(n.position + Vector3(0, 3, 0), Vector3(0.5, 0.1, 0.5) * gridSize, Quaternion::AxisAngleToQuaterion(Vector3(0, 0, 1), -30), "Prop", "Prop", 0, Vector4(1, 0, 0, 1));
+				AddOBBToWorld(n.position + Vector3(0, 3, 0), Vector3(0.5, 0.1, 0.5) * gridSize, Quaternion::AxisAngleToQuaterion(Vector3(0, 0, 1), -30), "Slope", "Default", 0, Vector4(1, 0, 0, 1));
 			}
 			if (n.type == 'o')
 			{
 				AddStateObjectToWorld(n.position + Vector3(0, 6, 0), Vector3(0.5, 0.5, 0.5) * gridSize, "Obstacle", "Default", 0, Vector4(1, 0, 0, 1));
+			}
+			if (n.type == 'l')
+			{
+				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Floor", "Default", 0);
+				InitPendulum(n.position + Vector3(0, 130, 0), true);
+			}
+			if (n.type == 'r')
+			{
+				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Floor", "Default", 0);
+				InitPendulum(n.position + Vector3(0, 130, 0), false);
 			}
 			else
 				continue;
@@ -417,10 +435,10 @@ void TutorialGame::InitGridMap(string filename)
 
 void TutorialGame::InitSpherePlayer()
 {
-	player = AddSphereToWorld(Vector3(10, 10, 10), 3, "Player", "Player", 1, Vector4(0, 1, 1, 1));
+	player = AddSphereToWorld(Vector3(10, 10, 10), 3, "Player", "Player", 3, Vector4(0, 1, 1, 1));
 }
 
-void TutorialGame::InitPendulum()
+void TutorialGame::InitPendulum(Vector3 s, bool isLeft)
 {
 	Vector3 cubeSize		= Vector3(4, 4, 4);
 	float	invCubeMass		= 1;	//How heavy the middle pieces are
@@ -428,9 +446,13 @@ void TutorialGame::InitPendulum()
 	float	maxDistance		= 40;	//Constraint distance
 	float	cubeDistance	= 20;	//Distance between links
 
-	Vector3		startPos	= Vector3(140, 130, 60);
+	if (isLeft)
+		cubeDistance = -cubeDistance;
+
+	Vector3		startPos	= s/*Vector3(130, 130, 60)*/;
 	GameObject* start		= AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
-	GameObject* end			= AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, "Ball", "Obstacle", 1);
+	GameObject* end			= AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, "Obstacle", "Default", 1, Vector4(1, 0, 0, 1));
+
 	GameObject* previous	= start;
 
 	for (int i = 0; i < numLinks; ++i)
@@ -852,13 +874,18 @@ void TutorialGame::MoveSelectedObject() {
 		RayCollision closestCollision;
 		if (world->Raycast(ray, closestCollision, true))
 		{
-			if (closestCollision.node == selectionObject)
+			/*if (closestCollision.node == selectionObject)
 			{	
 				selectionObject->GetPhysicsObject()->AddForce(ray.GetDirection() * forceMagnitude);
-			}
+			}*/
 			if (closestCollision.node == selectionObject)
 			{
-				selectionObject->GetPhysicsObject()->AddForceAtPosition(ray.GetDirection() * forceMagnitude, closestCollision.collidedAt);
+				if (selectionObject->GetTag() == "Prop")
+				{
+					selectionObject->GetPhysicsObject()->AddForce(ray.GetDirection() * forceMagnitude);
+				}
+				else
+					selectionObject->GetPhysicsObject()->AddForceAtPosition(ray.GetDirection() * forceMagnitude, closestCollision.collidedAt);
 			}
 		}
 	}

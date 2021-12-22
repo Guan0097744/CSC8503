@@ -210,6 +210,10 @@ void PhysicsSystem::BasicCollisionDetection() {
 				{
 					continue;
 				}
+				if ((*i)->GetTag() == "Prop" || (*j)->GetTag() == "Prop")
+				{
+					PenaltyResolveCollision(*info.a, *info.b, info.point);
+				}
 				else
 				{
 					//std::cout << "Collision between " << (*i)->GetName() << " and " << (*j)->GetName() << std::endl;
@@ -298,8 +302,8 @@ void PhysicsSystem::PenaltyResolveCollision(GameObject& a, GameObject& b, Collis
 	Vector3 angVelocityA = Vector3::Cross(physA->GetAngularVelocity(), relativeA);
 	Vector3 angVelocityB = Vector3::Cross(physB->GetAngularVelocity(), relativeB);
 
-	Vector3 fullVelocityA = physA->GetLinearVelocity() + angVelocityA;
-	Vector3 fullVelocityB = physB->GetLinearVelocity() + angVelocityB;
+	Vector3 fullVelocityA = physA->GetLinearVelocity() * inverseMassA + angVelocityA;
+	Vector3 fullVelocityB = physB->GetLinearVelocity() * inverseMassB + angVelocityB;
 
 	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
 

@@ -36,7 +36,7 @@ namespace NCL {
 
 			void InitGridMap(string filename);
 			void InitSpherePlayer();
-			void InitPendulum();
+			void InitPendulum(Vector3 s, bool isLeft);
 
 #pragma endregion
 
