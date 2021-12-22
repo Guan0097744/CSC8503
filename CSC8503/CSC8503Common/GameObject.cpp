@@ -45,3 +45,30 @@ void GameObject::UpdateBroadphaseAABB() {
 		broadphaseAABB = mat * halfSizes;
 	}
 }
+
+bool GameObject::OnTriggerEnter(vector<GameObject*> objs, string name)
+{
+	std::vector <GameObject*>::const_iterator first;
+	std::vector <GameObject*>::const_iterator last;
+
+	first	= objs.begin();
+	last	= objs.end();
+
+	for (auto i = first; i != last; ++i)
+	{
+		CollisionDetection::CollisionInfo info;
+		if (CollisionDetection::ObjectIntersection(this, *i, info))
+		{
+			if ((*i)->GetName() == name)
+			{
+				triggerTarget = (*i);
+				return true;
+			}
+			else
+				continue;
+		}	
+	}
+	return false;
+
+	
+}

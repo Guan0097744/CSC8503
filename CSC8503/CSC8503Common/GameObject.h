@@ -83,12 +83,23 @@ namespace NCL {
 				return tag;
 			}
 
+			bool OnTriggerEnter(vector<GameObject*> objs, string name);
+
+			GameObject* GetTriggerObj()
+			{
+				if (triggerTarget != nullptr)
+				{
+					return triggerTarget;
+				}
+			}
+
 		protected:
 			Transform			transform;
 
 			CollisionVolume*	boundingVolume;
 			PhysicsObject*		physicsObject;
 			RenderObject*		renderObject;
+			GameObject*			triggerTarget = nullptr;
 
 			bool	isActive;
 			int		worldID;

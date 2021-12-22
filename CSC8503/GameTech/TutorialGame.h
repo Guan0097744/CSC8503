@@ -15,7 +15,8 @@ namespace NCL {
 
 			virtual void UpdateGame(float dt);
 
-			bool isQuit = false;
+			Vector4 originalColour	= Vector4(1, 1, 1, 1);
+			bool	isQuit			= false;
 
 		protected:
 			void InitialiseAssets();
@@ -26,8 +27,6 @@ namespace NCL {
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
 			void InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing);
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
-			void InitDefaultFloor();
-			void BridgeConstraintTest();
 
 #pragma region MyInit
 
@@ -43,27 +42,27 @@ namespace NCL {
 
 			void Mode1Playing(float dt);
 			void Mode2Playing(float dt);
+			void BonusCollect();
+			void GameWin();
+			void GameLose();
 
 			bool SelectObject();
 			void MoveSelectedObject();
 			void DebugObjectMovement();
 			void LockedObjectMovement();
 
-			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddOBBToWorld(const Vector3& position);
-			GameObject* AddOBBToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f, Vector4 color = Vector4(1, 1, 1, 1));
+			GameObject* AddOBBToWorld(const Vector3& position, Vector3 dimensions, Quaternion rotation, string objectName, string tag, float inverseMass = 10.0f, Vector4 color = Vector4(1, 1, 1, 1));
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, string objectName, string tag, float inverseMass = 10.0f, Vector4 color = Vector4(1, 1, 1, 1));
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 10.0f, Vector4 color = Vector4(1, 1, 1, 1));
-			
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f);
-
-			GameObject* AddPlayerToWorld(const Vector3& position);
-			GameObject* AddEnemyToWorld(const Vector3& position);
 			GameObject* AddBonusToWorld(const Vector3& position);
 			GameObject* AddBonusToWorld(const Vector3& position, float radius, string objectName, string tag, float inverseMass = 0.0f, Vector4 color = Vector4(1, 1, 0, 1));
 
+			GameObject* AddPlayerToWorld(const Vector3& position);
+			GameObject* AddEnemyToWorld(const Vector3& position);
 
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
@@ -72,6 +71,10 @@ namespace NCL {
 			NavigationGrid*		gridMap;
 			GameObject*			player;
 			PushdownMachine*	pdMachine;
+
+			vector<StateGameObject*> obsStateObjects;
+
+			int					playerScore;
 
 			bool				useGravity;
 			bool				inSelectionMode;
@@ -101,7 +104,9 @@ namespace NCL {
 
 			//Courseware StateMachine
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
-			StateGameObject* testStateObject = nullptr;
+			StateGameObject* AddStateObjectToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass = 0.0f, Vector4 color = Vector4(1, 1, 1, 1));
+			StateGameObject* testStateObject	= nullptr;
+			StateGameObject* obsStateObject		= nullptr;
 
 		};
 
@@ -206,7 +211,15 @@ namespace NCL {
 		{
 			PushdownResult OnUpdate(float dt, PushdownState** newState) override
 			{
-
+				Debug::Print("You Win!", Vector2(45, 40));
+				//Debug::Print("Restart ---- Press R", Vector2(35, 50));
+				Debug::Print("Menu ---- Press ESC", Vector2(35, 50));
+				if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
+				{
+					//popTimes = 2;
+					return PushdownResult::Pop;
+				}
+				return PushdownResult::NoChange;
 			}
 			void OnAwake() override
 			{

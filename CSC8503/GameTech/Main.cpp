@@ -152,8 +152,8 @@ void TestPathfinding()
 {
 	NavigationGrid	grid("TestGrid1.txt");
 	NavigationPath	outPath;
-	Vector3			startPos(80, 0, 10);
-	Vector3			endPos(80, 0, 80);
+	Vector3			startPos(80, 1.2, 10);
+	Vector3			endPos(80, 1.2, 80);
 
 	bool found = grid.FindPath(startPos, endPos, outPath);
 	Vector3 pos;

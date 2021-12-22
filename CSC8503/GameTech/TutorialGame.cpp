@@ -16,6 +16,7 @@ TutorialGame::TutorialGame()	{
 	physics		= new PhysicsSystem(*world);
 	pdMachine	= new PushdownMachine(new MenuState());
 
+	playerScore		= 0;
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
 	inSelectionMode = false;
@@ -105,11 +106,6 @@ void TutorialGame::UpdateGame(float dt) {
 
 		UpdateKeys();
 		Mode1Playing(dt);
-
-		if (player->GetTransform().GetPosition().y <= -10.0f)
-		{
-			pdMachine->SetActiveState(new LoseState());
-		}
 	}
 	if (pdMachine->GetActiveState()->GetStateName() == "Mode2State")
 	{
@@ -130,6 +126,10 @@ void TutorialGame::UpdateGame(float dt) {
 
 void TutorialGame::Mode1Playing(float dt)
 {
+	BonusCollect();
+	GameWin();
+	GameLose();
+
 	if (useGravity) {
 		Debug::Print("(G)ravity on", Vector2(5, 95));
 	}
@@ -142,7 +142,7 @@ void TutorialGame::Mode1Playing(float dt)
 	physics->Update(dt);
 
 	if (lockedObject != nullptr) {
-		LockCameraToObject(lockedObject, Vector3(0, 0, 0), world);
+		LockCameraToObject(lockedObject, Vector3(0, 50, 10), world);
 		//Debug::DrawAxisLines(lockedObject->GetTransform().GetMatrix(), 2.0f);
 	}
 
@@ -151,18 +151,48 @@ void TutorialGame::Mode1Playing(float dt)
 	Debug::FlushRenderables(dt);
 	renderer->Render();*/
 
-	if (testStateObject)
+	for (auto i : obsStateObjects)
 	{
-		testStateObject->Update(dt);
+		i->Update(dt);
 	}
 }
 void TutorialGame::Mode2Playing(float dt)
 {
+	BonusCollect();
+	GameWin();
+	GameLose();
+
 	physics->Update(dt);
 
 	if (lockedObject != nullptr) {
 		LockCameraToObject(lockedObject, Vector3(0, 50, 10), world);
 		//Debug::DrawAxisLines(lockedObject->GetTransform().GetMatrix(), 2.0f);
+	}
+}
+
+void TutorialGame::BonusCollect()
+{
+	Debug::Print("Score: " + std::to_string(playerScore), Vector2(5, 15));
+	if (player->OnTriggerEnter(world->GetAllObjs(), "Coin"))
+	{
+		playerScore++;
+		world->RemoveGameObject(player->GetTriggerObj(), true);
+	}
+}
+
+void TutorialGame::GameWin()
+{
+	if (player->OnTriggerEnter(world->GetAllObjs(), "Finish"))
+	{
+		pdMachine->SetActiveState(new WinState());
+	}
+}
+
+void TutorialGame::GameLose()
+{
+	if (player->GetTransform().GetPosition().y <= -5.0f)
+	{
+		pdMachine->SetActiveState(new LoseState());
 	}
 }
 
@@ -285,18 +315,6 @@ void TutorialGame::DebugObjectMovement() {
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
 			selectionObject->GetPhysicsObject()->AddTorque(Vector3(10, 0, 0));
 		}
-
-		/*if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM7)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, 10, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM8)) {
-			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, -10, 0));
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM5)) {
-			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, -10, 0));
-		}*/
 	}
 
 }
@@ -312,6 +330,7 @@ void TutorialGame::InitCamera() {
 
 void TutorialGame::InitMenu()
 {
+	playerScore		= 0;
 	selectionObject = nullptr;
 	lockedObject	= nullptr;
 	hasInitLevel	= false;
@@ -343,6 +362,7 @@ void TutorialGame::InitWorld2() {
 	inSelectionMode = true;
 
 	physics->UseGravity(useGravity);
+	//obsStateObject = AddStateObjectToWorld(Vector3(0, 10, 0));
 }
 
 #pragma region MyInit
@@ -362,12 +382,32 @@ void TutorialGame::InitGridMap(string filename)
 			GridNode& n = gridNodes[(mapWidth * h) + w];
 			if (n.type == 'x')
 			{
-				AddCubeToWorld(n.position + Vector3(0, 2, 0), Vector3(0.5, 1, 0.5) * gridSize, "Wall", "Default", 0, Vector4(1, 1, 0, 1));
+				AddCubeToWorld(n.position + Vector3(0, 6, 0), Vector3(0.5, 0.5, 0.5) * gridSize, "Wall", "Default", 0, Vector4(0, 0, 1, 1));
 			}
 			if (n.type == '.')
 			{
 				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Floor", "Default", 0);
 				AddBonusToWorld(n.position + Vector3(0, 5, 0), 0.25f, "Coin", "Default");
+			}
+			if (n.type == 'e')
+			{
+				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Finish", "Default", 0, Vector4(1, 0, 0, 1));
+			}
+			if (n.type == 'p')
+			{
+				AddCubeToWorld(n.position + Vector3(0, 6, 0), Vector3(0.5, 0.5, 0.5) * gridSize, "Prop", "Prop", 0, Vector4(0, 0.5, 0, 1));
+			}
+			if (n.type == '/')
+			{
+				AddOBBToWorld(n.position + Vector3(0, 3, 0), Vector3(0.5, 0.1, 0.5) * gridSize, Quaternion::AxisAngleToQuaterion(Vector3(0, 0, 1), 30), "Prop", "Prop", 0, Vector4(1, 0, 0, 1));
+			}
+			if (n.type == '\\')
+			{
+				AddOBBToWorld(n.position + Vector3(0, 3, 0), Vector3(0.5, 0.1, 0.5) * gridSize, Quaternion::AxisAngleToQuaterion(Vector3(0, 0, 1), -30), "Prop", "Prop", 0, Vector4(1, 0, 0, 1));
+			}
+			if (n.type == 'o')
+			{
+				AddStateObjectToWorld(n.position + Vector3(0, 6, 0), Vector3(0.5, 0.5, 0.5) * gridSize, "Obstacle", "Default", 0, Vector4(1, 0, 0, 1));
 			}
 			else
 				continue;
@@ -383,14 +423,14 @@ void TutorialGame::InitSpherePlayer()
 void TutorialGame::InitPendulum()
 {
 	Vector3 cubeSize		= Vector3(4, 4, 4);
-	float	invCubeMass		= 20;	//How heavy the middle pieces are
-	int		numLinks		= 10;
-	float	maxDistance		= 15;	//Constraint distance
-	float	cubeDistance	= 10;	//Distance between links
+	float	invCubeMass		= 1;	//How heavy the middle pieces are
+	int		numLinks		= 2;
+	float	maxDistance		= 40;	//Constraint distance
+	float	cubeDistance	= 20;	//Distance between links
 
-	Vector3		startPos	= Vector3(-60, 150, 60);
+	Vector3		startPos	= Vector3(140, 130, 60);
 	GameObject* start		= AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
-	GameObject* end			= AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, "Ball", "Obstacle", 20);
+	GameObject* end			= AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, "Ball", "Obstacle", 1);
 	GameObject* previous	= start;
 
 	for (int i = 0; i < numLinks; ++i)
@@ -406,59 +446,9 @@ void TutorialGame::InitPendulum()
 
 #pragma endregion
 
-void TutorialGame::BridgeConstraintTest() {
-
-	Vector3 cubeSize		= Vector3(4, 4, 4);
-	float	invCubeMass		= 100;	//How heavy the middle pieces are
-	int		numLinks		= 10;
-	float	maxDistance		= 30;	//Constraint distance
-	float	cubeDistance	= 20;	//Distance between links
-
-	Vector3		startPos	= Vector3(-60, 150, 60);
-	GameObject* start		= AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
-	GameObject* end			= AddCubeToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), cubeSize, 20);
-	GameObject* previous	= start;
-
-	for (int i = 0; i < numLinks; ++i)
-	{
-		GameObject* block = AddCubeToWorld(startPos + Vector3((i + 1) * cubeDistance, 0, 0), cubeSize, invCubeMass);
-		PositionConstraint* constraint = new PositionConstraint(previous, block, maxDistance);
-		world->AddConstraint(constraint);
-		previous = block;
-	}
-	PositionConstraint* constraint = new PositionConstraint(previous, end, maxDistance);
-	world->AddConstraint(constraint);
-}
-
-/*
-A single function to add a large immovable cube to the bottom of our world
-*/
-GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
-	GameObject* floor = new GameObject();
-
-	Vector3 floorSize	= Vector3(100, 2, 100);
-	AABBVolume* volume	= new AABBVolume(floorSize);
-	floor->SetBoundingVolume((CollisionVolume*)volume);
-	floor->GetTransform()
-		.SetScale(floorSize * 2)
-		.SetPosition(position);
-
-	//floor->GetTransform().SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1, 0, 0), 45));
-
-	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
-	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
-
-	floor->GetPhysicsObject()->SetInverseMass(0);
-	floor->GetPhysicsObject()->InitCubeInertia();
-
-	world->AddGameObject(floor);
-
-	return floor;
-}
 
 GameObject* TutorialGame::AddOBBToWorld(const Vector3& position) {
 	GameObject* floor = new GameObject();
-	floor->SetTag("Default");
 
 	Vector3 floorSize = Vector3(100, 2, 100);
 	OBBVolume* volume = new OBBVolume(floorSize);
@@ -479,7 +469,7 @@ GameObject* TutorialGame::AddOBBToWorld(const Vector3& position) {
 
 	return floor;
 }
-GameObject* TutorialGame::AddOBBToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass, Vector4 color)
+GameObject* TutorialGame::AddOBBToWorld(const Vector3& position, Vector3 dimensions, Quaternion rotation, string objectName, string tag, float inverseMass, Vector4 color)
 {
 	GameObject* cube = new GameObject(objectName);
 	cube->SetTag(tag);
@@ -491,6 +481,8 @@ GameObject* TutorialGame::AddOBBToWorld(const Vector3& position, Vector3 dimensi
 	cube->GetTransform()
 		.SetPosition(position)
 		.SetScale(dimensions * 2);
+
+	cube->GetTransform().SetOrientation(rotation);
 
 	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
 	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
@@ -633,7 +625,7 @@ void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacin
 			AddSphereToWorld(position, radius, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
+	//AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing) {
@@ -661,10 +653,6 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 			AddCubeToWorld(position, cubeDims, 1.0f);
 		}
 	}
-}
-
-void TutorialGame::InitDefaultFloor() {
-	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 void TutorialGame::InitGameExamples() {
@@ -750,7 +738,7 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 }
 GameObject* TutorialGame::AddBonusToWorld(const Vector3& position, float radius, string objectName, string tag, float inverseMass, Vector4 color)
 {
-	GameObject* apple = new GameObject();
+	GameObject* apple = new GameObject(objectName);
 
 	Vector3 scale = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(0.3f);
@@ -795,19 +783,18 @@ bool TutorialGame::SelectObject() {
 	}
 	if (inSelectionMode) {
 		renderer->DrawString("Press Q to change to camera mode!", Vector2(5, 85));
-
 		if (Window::GetMouse()->ButtonDown(NCL::MouseButtons::LEFT)) {
-			if (selectionObject) {	//set colour to deselected;
-				selectionObject->GetRenderObject()->SetColour(Vector4(1, 1, 1, 1));
+			if (selectionObject && selectionObject->GetTag() != "Default") {	//set colour to deselected;
+				selectionObject->GetRenderObject()->SetColour(originalColour);
 				selectionObject = nullptr;
 				lockedObject	= nullptr;
 			}
 
 			Ray ray = CollisionDetection::BuildRayFromMouse(*world->GetMainCamera());
-
 			RayCollision closestCollision;
 			if (world->Raycast(ray, closestCollision, true)) {
 				selectionObject = (GameObject*)closestCollision.node;
+				originalColour	= selectionObject->GetRenderObject()->GetColour();
 				if (selectionObject->GetTag() != "Default")
 				{
 					selectionObject->GetRenderObject()->SetColour(Vector4(0, 1, 0, 1));
@@ -840,7 +827,6 @@ bool TutorialGame::SelectObject() {
 				lockedObject = selectionObject;
 			}
 		}
-
 	}
 
 	return false;
@@ -878,7 +864,8 @@ void TutorialGame::MoveSelectedObject() {
 	}
 }
 
-StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position) {
+StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position) 
+{
 	StateGameObject* apple = new StateGameObject();
 
 	SphereVolume* volume = new SphereVolume(0.25f);
@@ -894,6 +881,30 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position) {
 	apple->GetPhysicsObject()->InitSphereInertia();
 
 	world->AddGameObject(apple);
+	obsStateObjects.emplace_back(apple);
 
 	return apple;
+}
+StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position, Vector3 dimensions, string objectName, string tag, float inverseMass, Vector4 color) 
+{
+	StateGameObject* obs = new StateGameObject();
+	obs->SetTag(tag);
+
+	AABBVolume* volume = new AABBVolume(dimensions);
+	obs->SetBoundingVolume((CollisionVolume*)volume);
+	obs->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	obs->SetRenderObject(new RenderObject(&obs->GetTransform(), cubeMesh, basicTex, basicShader));
+	obs->GetRenderObject()->SetColour(color);
+	obs->SetPhysicsObject(new PhysicsObject(&obs->GetTransform(), obs->GetBoundingVolume()));
+
+	obs->GetPhysicsObject()->SetInverseMass(inverseMass);
+	obs->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(obs);
+	obsStateObjects.emplace_back(obs);
+
+	return obs;
 }
