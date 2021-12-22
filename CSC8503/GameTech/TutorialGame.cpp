@@ -420,11 +420,13 @@ void TutorialGame::InitGridMap(string filename)
 			if (n.type == 'l')
 			{
 				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Floor", "Default", 0);
+				AddBonusToWorld(n.position + Vector3(0, 5, 0), 0.25f, "Coin", "Default");
 				InitPendulum(n.position + Vector3(0, 130, 0), true);
 			}
 			if (n.type == 'r')
 			{
 				AddCubeToWorld(n.position, Vector3(0.5, 0.1, 0.5) * gridSize, "Floor", "Default", 0);
+				AddBonusToWorld(n.position + Vector3(0, 5, 0), 0.25f, "Coin", "Default");
 				InitPendulum(n.position + Vector3(0, 130, 0), false);
 			}
 			else
@@ -451,7 +453,7 @@ void TutorialGame::InitPendulum(Vector3 s, bool isLeft)
 
 	Vector3		startPos	= s/*Vector3(130, 130, 60)*/;
 	GameObject* start		= AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
-	GameObject* end			= AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 10, "Obstacle", "Default", 1, Vector4(1, 0, 0, 1));
+	GameObject* end			= AddSphereToWorld(startPos + Vector3((numLinks + 2) * cubeDistance, 0, 0), 7.5f, "Obstacle", "Default", 1, Vector4(1, 0, 0, 1));
 
 	GameObject* previous	= start;
 
